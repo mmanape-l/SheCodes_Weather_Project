@@ -1,95 +1,58 @@
-body {
-    background-color: #f9f7fe;
-    font-family: "Roboto", sans-serif;
+function refreshWeather(response) {
+  let temperatureElement = document.querySelector("#temperature");
+  let temperature = response.data.temperature.current;
+  let cityElement = document.querySelector("#city");
+  let descriptionElement = document.querySelector("#description");
+  let humidityElement = document.querySelector("#humidity");
+  let windSpeedElement = document.querySelector("#wind-speed");
+  let timeElement = document.querySelector("#time");
+  let date = new Date(response.data.time * 1000);
+  let iconElement = document.querySelector("#icon");
+
+  cityElement.innerHTML = response.data.city;
+  timeElement.innerHTML = formatDate(date);
+  descriptionElement.innerHTML = response.data.condition.description;
+  humidityElement.innerHTML = `${response.data.temperature.humidity}%`;
+  windSpeedElement.innerHTML = `${response.data.wind.speed}km/h`;
+  temperatureElement.innerHTML = Math.round(temperature);
+  iconElement.innerHTML = `<img src="${response.data.condition.icon_url}" class="weather-app-icon" />`;
+}
+
+function formatDate(date) {
+  let minutes = date.getMinutes();
+  let hours = date.getHours();
+  let days = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+  let day = days[date.getDay()];
+
+  if (minutes < 10) {
+    minutes = `0${minutes}`;
   }
-  
-  a {
-    color: #885df1;
-  }
-  
-  .weather-app {
-    background: white;
-    max-width: 600px;
-    margin: 45px auto;
-    box-shadow: 0 30px 50px rgba(65, 50, 100, 0.08);
-    border-radius: 16px;
-    padding: 30px;
-  }
-  
-  header {
-    border-bottom: 1px solid #f9f7fe;
-    padding: 0 0 30px 0;
-  }
-  
-  .search-form-input {
-    background-color: #f9f7fe;
-    border: none;
-    border-radius: 6px;
-    width: 80%;
-    font-size: 16px;
-    padding: 15px 20px;
-  }
-  
-  .search-form-button {
-    background: #885df1;
-    padding: 15px 30px;
-    border: none;
-    font-size: 16px;
-    margin-left: 5px;
-    border-radius: 6px;
-    color: white;
-  }
-  
-  main {
-    padding: 30px 0;
-  }
-  
-  .weather-app-data {
-    display: flex;
-    justify-content: space-between;
-  }
-  
-  .weather-app-city {
-    margin: 0;
-    font-size: 38px;
-    line-height: 48px;
-  }
-  
-  .weather-app-details {
-    font-size: 16px;
-    color: rgba(39, 33, 66, 0.4);
-    line-height: 24px;
-    font-weight: 500;
-  }
-  
-  .weather-app-details strong {
-    color: #f65282;
-  }
-  
-  .weather-app-temperature-container {
-    display: flex;
-  }
-  
-  .weather-app-icon {
-    width: 88px;
-    height: 88px;
-  }
-  
-  .weather-app-temperature {
-    font-size: 88px;
-    line-height: 88px;
-    font-weight: bold;
-  }
-  
-  .weatehr-app-unit {
-    margin-top: 6px;
-    font-size: 28px;
-  }
-  
-  footer {
-    border-top: 1px solid #f9f7fe;
-    padding: 30px 0 0 0;
-    text-align: center;
-    font-size: 14px;
-    color: rgba(0, 0, 0, 0.6);
-  }
+
+  return `${day} ${hours}:${minutes}`;
+}
+
+function searchCity(city) {
+  let apiKey = "b2a5adcct04b33178913oc335f405433";
+  let apiUrl = `https://api.shecodes.io/weather/v1/current?query=${city}&key=${apiKey}`;
+  axios.get(apiUrl).then(refreshWeather);
+}
+
+function handleSearchSubmit(event) {
+  event.preventDefault();
+  let searchInput = document.querySelector("#search-form-input");
+
+  searchCity(searchInput.value);
+}
+
+let searchFormElement = document.querySelector("#search-form");
+searchFormElement.addEventListener("submit", handleSearchSubmit);
+
+searchCity("Paris");
